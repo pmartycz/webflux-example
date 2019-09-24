@@ -1,6 +1,7 @@
 package io.github.pmartycz.ghinfo;
 
 import io.netty.channel.ChannelOption;
+import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import lombok.AllArgsConstructor;
@@ -10,7 +11,11 @@ import org.springframework.boot.web.reactive.function.client.WebClientCustomizer
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
+import reactor.netty.tcp.SslProvider;
 import reactor.netty.tcp.TcpClient;
+
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static org.springframework.web.reactive.function.client.ExchangeFilterFunctions.basicAuthentication;
 
@@ -44,16 +49,23 @@ public class Application implements WebClientCustomizer {
     private HttpClient http() {
         int timeout = 500; // hmm
 
+        Function<TcpClient, TcpClient> tcpConfig = tcp ->
+                tcp.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, timeout)
+                .doOnConnected(connection -> {
+                    connection.addHandlerLast(new ReadTimeoutHandler(timeout));
+                    connection.addHandlerLast(new WriteTimeoutHandler(timeout));
+                });
+
+        Consumer<SslProvider.SslContextSpec> sslConfig = spec ->
+                spec.sslContext(SslContextBuilder.forClient()
+                        .sessionTimeout(timeout)
+                        .protocols("TLSv1.3"));
+
         return HttpClient.create()
                 .followRedirect(true) // As per https://developer.github.com/v3/#http-redirects
                 .compress(true) // those jsons you know they can get very long
-                .tcpConfiguration(tcp -> tcp
-                        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, timeout)
-                        .doOnConnected(connection -> {
-                                connection.addHandlerLast(new ReadTimeoutHandler(timeout));
-                                connection.addHandlerLast(new WriteTimeoutHandler(timeout));
-                        })
-                );
+                .tcpConfiguration(tcpConfig)
+                .secure(sslConfig);
     }
 
 }
