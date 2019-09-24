@@ -14,7 +14,7 @@ final class OwnerRepositories implements Repositories {
     private final String owner;
 
     @Override
-    public Mono<RepositoryModel> find(String name) {
+    public Mono<RepositoryModel> get(String name) {
         return web.get().uri("/repos/{owner}/{name}", owner, name)
                 .retrieve()
                 .bodyToMono(RepositoryClientModel.class)

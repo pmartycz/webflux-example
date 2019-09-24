@@ -17,7 +17,7 @@ final class DefaultRepositories implements RepositoriesFactory {
 
     @Override
     public Repositories ownerRepositories(String owner) {
-        return new OwnerRepositories(web, owner);
+        return new CachedRepositories(new OwnerRepositories(web, owner));
     }
 
 }

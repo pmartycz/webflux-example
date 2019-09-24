@@ -16,7 +16,7 @@ final class RepositoriesHandler {
         String name = request.pathVariable("name");
 
         return ServerResponse.ok()
-                .body(repos.ownerRepositories(owner).find(name), RepositoryModel.class)
+                .body(repos.ownerRepositories(owner).get(name), RepositoryModel.class)
                 .switchIfEmpty(ServerResponse.notFound().build());
     }
 

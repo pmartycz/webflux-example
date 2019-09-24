@@ -11,7 +11,7 @@ interface Repositories {
     /**
      * Returns information about named repository.
      */
-    Mono<RepositoryModel> find(String name);
+    Mono<RepositoryModel> get(String name);
 
     /**
      * Returns information about all repositories in collection.
