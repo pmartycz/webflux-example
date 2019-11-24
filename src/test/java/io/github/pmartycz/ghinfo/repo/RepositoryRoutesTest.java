@@ -17,15 +17,15 @@ public class RepositoryRoutesTest {
 
     @Test
     public void testOwnerNameRoute() {
-        web.get().uri("/repositories/{owner}/{name}", "pmartycz", "apoz")
+        web.get().uri("/repositories/{owner}/{name}", "pmartycz", "webflux-example")
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
                 .expectBody()
-                .jsonPath("$.fullName").isEqualTo("pmartycz/apoz")
+                .jsonPath("$.fullName").isEqualTo("pmartycz/webflux-example")
                 .jsonPath("$.description").hasJsonPath()
                 .jsonPath("$.cloneUrl")
-                        .isEqualTo("https://github.com/pmartycz/apoz.git")
+                        .isEqualTo("https://github.com/pmartycz/webflux-example.git")
                 .jsonPath("$.createdAt").isEqualTo("2017-02-08T17:10:12Z")
                 .jsonPath("$.stars").isNumber();
     }
